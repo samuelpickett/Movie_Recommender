@@ -1,4 +1,4 @@
-// AI-generated code
+// This file contains AI-generated code.
 package movies;
 
 import java.io.IOException;
@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -82,8 +81,7 @@ public final class RatingStore {
         try {
             StringBuilder csv = new StringBuilder("MovieId,PersonalStars\n");
             for (Map.Entry<String, Double> entry : new TreeMap<>(ratings).entrySet()) {
-                csv.append(entry.getKey()).append(',')
-                        .append(String.format(Locale.ROOT, "%.1f", entry.getValue())).append('\n');
+                csv.append(entry.getKey()).append(',').append(entry.getValue()).append('\n');
             }
             Files.writeString(temporary, csv.toString(), StandardCharsets.UTF_8);
             try {
@@ -96,10 +94,10 @@ public final class RatingStore {
         }
     }
 
-    /** Rejects ratings outside 0.5–5.0 or between half-star steps. */
+    /** Rejects non-finite ratings and values outside the inclusive 0.0–5.0 range. */
     private static void validate(double stars) {
-        if (!Double.isFinite(stars) || stars < 0.5 || stars > 5.0 || stars * 2 != Math.rint(stars * 2)) {
-            throw new IllegalArgumentException("Rating must be 0.5 to 5.0 in half-star steps");
+        if (!Double.isFinite(stars) || stars < 0.0 || stars > 5.0) {
+            throw new IllegalArgumentException("Rating must be between 0.0 and 5.0.");
         }
     }
 }

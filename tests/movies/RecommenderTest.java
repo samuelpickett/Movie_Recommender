@@ -1,4 +1,4 @@
-// AI-generated code
+// This file contains AI-generated code.
 package movies;
 
 import java.io.IOException;
@@ -18,6 +18,7 @@ public final class RecommenderTest {
         breaksTiesByPublicRatingAndVotes();
         offersDiverseStarterMovies();
         persistsPersonalRatings();
+        retriesInvalidRatingInCli();
         System.out.println("All recommender checks passed.");
     }
 
@@ -94,23 +95,59 @@ public final class RecommenderTest {
                 "starter genre diversity");
     }
 
-    /** Confirms ratings survive reload and edits replace the previous value. */
+    /** Confirms arbitrary decimals survive reload and invalid values are rejected. */
     private static void persistsPersonalRatings() throws IOException {
         Path directory = Files.createTempDirectory("movie-ratings-");
         Path file = directory.resolve("my_ratings.csv");
         try {
             RatingStore ratings = RatingStore.load(file);
-            ratings.rate("movie-one", 4.5);
+            ratings.rate("movie-one", 4.25);
+            check(RatingStore.load(file).ratings().get("movie-one") == 4.25, "decimal rating saved exactly");
             ratings.rate("movie-one", 2.0);
             check(RatingStore.load(file).ratings().get("movie-one") == 2.0, "rating save and replacement");
-            try {
-                ratings.rate("movie-two", 4.2);
-                throw new AssertionError("invalid rating was accepted");
-            } catch (IllegalArgumentException expected) {
-                check(!ratings.ratings().containsKey("movie-two"), "invalid rating leaves file unchanged");
+            ratings.rate("zero", 0.0);
+            ratings.rate("five", 5.0);
+            for (double invalid : List.of(-0.1, 5.1, Double.NaN, Double.POSITIVE_INFINITY)) {
+                try {
+                    ratings.rate("movie-two", invalid);
+                    throw new AssertionError("invalid rating was accepted: " + invalid);
+                } catch (IllegalArgumentException expected) {
+                    check(!ratings.ratings().containsKey("movie-two"), "invalid rating leaves file unchanged");
+                }
             }
         } finally {
             Files.deleteIfExists(file);
+            Files.deleteIfExists(directory);
+        }
+    }
+
+    /** Confirms the console asks again after bad ratings and saves the next valid value. */
+    private static void retriesInvalidRatingInCli() throws Exception {
+        Path directory = Files.createTempDirectory("movie-cli-");
+        Path catalog = directory.resolve("movies.csv");
+        Path ratings = directory.resolve("my_ratings.csv");
+        try {
+            Files.writeString(catalog,
+                    "Id,Title,Year,Director,Certificate,RuntimeMinutes,Genres,PublicRating,Votes\n"
+                            + "sample,Sample Movie,2024,Test Director,PG,90,Drama,7.0,100\n",
+                    StandardCharsets.UTF_8);
+            String executable = System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java";
+            Path java = Path.of(System.getProperty("java.home"), "bin", executable);
+            Process process = new ProcessBuilder(java.toString(), "-cp", System.getProperty("java.class.path"),
+                    "movies.Main", catalog.toString(), ratings.toString())
+                    .redirectErrorStream(true).start();
+            process.getOutputStream().write(
+                    "1\nSample\n1\n6\n-1\nnot-a-number\n4.25\n3\n4\n".getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().close();
+            String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            check(process.waitFor() == 0, "CLI completed");
+            check(output.split("Your rating, 0.0 to 5.0", -1).length - 1 == 4,
+                    "CLI re-prompts after each invalid rating");
+            check(output.contains("Saved your rating for Sample Movie."), "CLI saves the valid retry");
+            check(RatingStore.load(ratings).ratings().get("sample") == 4.25, "CLI preserves the entered decimal");
+        } finally {
+            Files.deleteIfExists(ratings);
+            Files.deleteIfExists(catalog);
             Files.deleteIfExists(directory);
         }
     }

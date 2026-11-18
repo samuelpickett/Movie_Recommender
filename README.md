@@ -11,7 +11,7 @@ cd C:\Users\samue\CSE-381\Movie_Recommender
 .\run.ps1
 ```
 
-The script compiles the source and opens a menu to find and rate movies, request ten recommendations, or view your ratings. Type part of a movie title to find it. Your ratings use 0.5 to 5 stars in half-star steps. Rating a movie again replaces your earlier rating.
+The script compiles the source and opens a menu to find and rate movies, request ten recommendations, or view your ratings. Type part of a movie title to find it. Your ratings can be any number from 0.0 to 5.0, including decimals. An invalid rating prompts you to try again. Rating a movie again replaces your earlier rating.
 
 When requesting recommendations, press Enter to skip either optional limit. With no age limit, movies with unknown or non-US certificates remain eligible. With a US certificate limit, only G, PG, PG-13, R, and NC-17 certificates at or below that limit are eligible. Movies already rated are excluded.
 

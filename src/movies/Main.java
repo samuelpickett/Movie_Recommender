@@ -1,4 +1,4 @@
-// AI-generated code
+// This file contains AI-generated code.
 package movies;
 
 import java.io.IOException;
@@ -73,6 +73,7 @@ public final class Main {
             System.out.printf(Locale.ROOT, "%2d. %s | %s | public %.1f/10%n",
                     index + 1, movie.title(), displayDirector(movie), movie.publicRating());
         }
+        Movie selected;
         while (true) {
             String choice = ask("Movie number to rate (Enter to cancel): ");
             if (choice == null || choice.isBlank()) {
@@ -83,19 +84,26 @@ public final class Main {
                 if (index < 0 || index >= matches.size()) {
                     throw new NumberFormatException();
                 }
-                Movie selected = matches.get(index);
-                String rating = ask("Your rating, 0.5 to 5.0 in half-star steps: ");
-                if (rating == null || rating.isBlank()) {
-                    return;
-                }
+                selected = matches.get(index);
+                break;
+            } catch (NumberFormatException exception) {
+                System.out.println("Enter a listed movie number.");
+            }
+        }
+
+        while (true) {
+            String rating = ask("Your rating, 0.0 to 5.0 (Enter to cancel): ");
+            if (rating == null || rating.isBlank()) {
+                return;
+            }
+            try {
                 ratingStore.rate(selected.id(), Double.parseDouble(rating));
                 System.out.println("Saved your rating for " + selected.title() + ".");
                 return;
             } catch (NumberFormatException exception) {
-                System.out.println("Enter a listed movie number and a numeric rating.");
+                System.out.println("Enter a numeric rating from 0.0 to 5.0.");
             } catch (IllegalArgumentException exception) {
                 System.out.println(exception.getMessage());
-                return;
             } catch (IOException exception) {
                 System.err.println("Could not save your rating: " + exception.getMessage());
                 return;
@@ -145,7 +153,7 @@ public final class Main {
         for (Map.Entry<String, Double> entry : entries) {
             Movie movie = catalog.get(entry.getKey());
             String title = movie == null ? "Missing from catalog: " + entry.getKey() : movie.title();
-            System.out.printf(Locale.ROOT, "%s | Your Rating: %.1f/5%n", title, entry.getValue());
+            System.out.println(title + " | Your Rating: " + entry.getValue() + "/5");
         }
     }
 
