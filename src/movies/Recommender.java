@@ -2,7 +2,6 @@
 package movies;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +19,7 @@ public final class Recommender {
 
     /** Returns up to limit eligible movies, or diverse public favorites for a new user. */
     public List<Result> recommend(Map<String, Double> personalRatings, Integer maximumRuntime,
-                                  String maximumCertificate, int limit) {
+                                String maximumCertificate, int limit) {
         if (limit <= 0) {
             return List.of();
         }

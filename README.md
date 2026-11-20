@@ -1,13 +1,21 @@
 # Movie recommender
 
-A personal Java command line recommender that learns genre preferences from movies you rate. The catalog is stored in CSV. Your ratings are saved separately in `data/my_ratings.csv`.
+A personal Java movie recommender with a desktop interface and a command line interface. Both learn genre preferences from movies you rate. The catalog is stored in CSV, and your ratings are saved separately in `data/my_ratings.csv`.
 
-## Run
+## Run the desktop interface
 
 Requires a Java 17 or newer JDK. From PowerShell:
 
 ```powershell
 cd C:\Users\samue\CSE-381\Movie_Recommender
+.\run.ps1 -Gui
+```
+
+The **Recommendations** tab has optional runtime and US certificate limits. Click **Give recommendations** to show ten unwatched movies. The **Rate Movies** tab searches titles when you press Enter or click **Search**. Select a result, enter any rating from 0.0 to 5.0, and click **Save rating**. You can select a previously rated movie to change its rating. After saving, return to Recommendations and click the button again to refresh the list.
+
+## Run the command line interface
+
+```powershell
 .\run.ps1
 ```
 
@@ -31,7 +39,7 @@ The script skips rows missing the title, genre, valid runtime, public rating, or
 
 ## Project layout
 
-- `src/movies`: catalog loading, personal rating storage, scoring, and command line interface
+- `src/movies`: catalog loading, personal rating storage, scoring, desktop interface, and command line interface
 - `data/movies.csv`: prepared movie catalog
 - `data/my_ratings.csv`: your personal ratings, ignored by Git
 - `tests/movies`: focused checks for CSV parsing, ranking, limits, and saved ratings

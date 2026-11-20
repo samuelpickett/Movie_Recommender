@@ -1,4 +1,6 @@
-# AI-generated code
+# This file contains AI-generated code.
+param([switch]$Gui)
+
 $ErrorActionPreference = 'Stop'
 $projectDirectory = $PSScriptRoot
 $utf8 = [System.Text.UTF8Encoding]::new($false)
@@ -31,7 +33,8 @@ if ($LASTEXITCODE -ne 0) {
 
 Push-Location $projectDirectory
 try {
-    & $javaPath '-Dstdout.encoding=UTF-8' '-Dstderr.encoding=UTF-8' -cp $outputDirectory movies.Main @args
+    $entryPoint = if ($Gui) { 'movies.GuiMain' } else { 'movies.Main' }
+    & $javaPath '-Dstdout.encoding=UTF-8' '-Dstderr.encoding=UTF-8' -cp $outputDirectory $entryPoint @args
 } finally {
     Pop-Location
 }
